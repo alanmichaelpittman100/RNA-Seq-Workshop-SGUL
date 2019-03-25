@@ -24,13 +24,11 @@ stopifnot(file.exists(lib.loc))
 
 These packages are required for us to perform our analysis steps in DESeq2, and some additional packages to manipulate our data and draw graphs. Execute the following block of code to load in the following packages:
 
+
 ```{r}
 library("magrittr")
-library("dplyr")
 library("Rsamtools")
-library("GenomicFeatures")
 library("GenomicAlignments")
-library("backports")
 library("DESeq2")
 library("ggplot2")
 library("org.Hs.eg.db")
@@ -38,6 +36,7 @@ library("gplots")
 library("pheatmap")
 library("RColorBrewer")
 ```
+
 
 
 ### STEP X: Type the following into the console to identify the working current R working directory:
