@@ -9,19 +9,27 @@
 #Volcano plot
 #reporting significant results in excel format etc.
 
+#Configure the R session
+
+lib.loc <- "/homes/homedirs8/workshops/190329-RNAseq/packages_3_4_3"
+stopifnot(file.exists(lib.loc))
+.libPaths()
+.libPaths(lib.loc)
 .libPaths()
 
-source("https://bioconductor.org/biocLite.R")
+#These packages are required for us to perform our analysis steps in DESeq2, and some additional packages to manipulate our data and draw graphs. 
+#Execute the following lines code to load in the following packages:
 
+library("magrittr")
 library("Rsamtools")
-library("GenomicFeatures")
 library("GenomicAlignments")
-library("backports")
 library("DESeq2")
 library("ggplot2")
 library("org.Hs.eg.db")
+library("gplots")
+library("pheatmap")
+library("RColorBrewer")
 
-#BiocInstaller::biocLite(c("GenomicFeatures", "AnnotationDbi"))
 
 #Loading the count data into R 
 
