@@ -11,6 +11,8 @@
 
 #Configure the R session
 
+stopifnot(R.version$version.string == "R version 3.4.3 (2017-11-30)")
+
 lib.loc <- "/homes/homedirs8/workshops/190329-RNAseq/packages_3_4_3"
 stopifnot(file.exists(lib.loc))
 .libPaths()
