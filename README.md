@@ -1,15 +1,9 @@
 # RNA-Seq-Workshop-SGUL-29_03_2019
 
 
-Alan Pittman
+Alan Pittman | apittman@sgul.ac.uk | St. George's University of London 
 
-apittman@sgul.ac.uk
-
-St. George's University of London
-
-29-March-2019
-
-1.30pm. H5.2
+29-March-2019 | 1.30pm. H5.2
 
 To create a copy of this repository in RStudio follow these steps:
 
