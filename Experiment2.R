@@ -209,7 +209,7 @@ range(res2[genes.to.plot,
 cols <- densCols(res2$log2FoldChange, res2$sig)
 cols[res2$pvalue ==0] <- "purple"
 res2$pch <- 19
-res2$pch[res$pvalue ==0] <- 6
+res2$pch[res2$pvalue ==0] <- 6
 plot(res2$log2FoldChange, 
      res2$sig, 
      col=cols, panel.first=grid(),
