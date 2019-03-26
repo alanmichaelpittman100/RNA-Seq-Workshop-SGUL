@@ -2,9 +2,13 @@
 
 
 Alan Pittman
+
 apittman@sgul.ac.uk
+
 St. George's University of London
+
 29-March-2019
+
 1.30pm. H5.2
 
 To create a copy of this repository in RStudio follow these steps:
