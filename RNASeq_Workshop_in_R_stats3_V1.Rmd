@@ -11,6 +11,9 @@ output: html_document
 
 Execute the following block of code to configure the loaction of the R packages required for this workshop:
 
+```{r}
+stopifnot(R.version$version.string == "R version 3.4.3 (2017-11-30)")
+```
 
 ```{r}
 lib.loc <- "/homes/homedirs8/workshops/190329-RNAseq/packages_3_4_3"
