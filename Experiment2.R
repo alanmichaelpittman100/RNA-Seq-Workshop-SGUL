@@ -194,7 +194,7 @@ alpha <- 0.05 # Threshold on the p-value
 # Compute significance, with a maximum of 320 for the p-values set to 0 due to limitation of computation precision
 res2$sig <- -log10(res2$padj)
 
-sum(is.infinite(res$sig))
+sum(is.infinite(res2$sig))
 
 res2[is.infinite(res2$sig),"sig"] <- 350
 # View(res[is.na(res$pvalue),])
