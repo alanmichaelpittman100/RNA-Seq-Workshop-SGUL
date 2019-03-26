@@ -16,3 +16,9 @@ To create a copy of this repository in RStudio follow these steps:
 6. Choose a desired folder in the "Create project as subdirectory of..." field
 7. Click the "Create project" button
 8. Switch version of Rstudio in top right hand corner to 3.4.3 !important!
+
+
+9. Open the Rmarkdown file ("RNASeq_Workshop_in_R_stats3_V1.Rmd") and begin to follow the instructions
+
+
+Experiment 2
