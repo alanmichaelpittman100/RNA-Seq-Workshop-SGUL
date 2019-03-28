@@ -37,11 +37,11 @@ library("RColorBrewer")
 
 CountsTable_Experiment2 <- as.matrix(read.table("Experiment2_count_data.txt", header = TRUE))
 
-#View the top of the "CountsTable_PPP2R3B" matrix object using the head command in R:
+#View the top of the "CountsTable_Experiment2" matrix object using the head command in R:
 
 head(CountsTable_Experiment2)
 
-#Here we are creating a new R matrix object called DESeq2Experiment2 using the as.matrix() function on our CountsTable_PPP2R3B object:
+#Here we are creating a new R matrix object called DESeq2Experiment2 using the as.matrix() function on our CountsTable_Experiment2 object:
 
 DESeq2Experiment2 <- as.matrix(CountsTable_Experiment2)
 
