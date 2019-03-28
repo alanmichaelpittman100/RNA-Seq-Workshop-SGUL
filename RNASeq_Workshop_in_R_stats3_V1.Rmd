@@ -265,6 +265,8 @@ View the results table with the head() function in R:
 head(results)
 ```
 
+The column log2FoldChange is the effect size estimate. It tells us how much the gene's expression has changed due to the treatment in comparison to the untreated samples. This value is reported on a logarithmic scale to base 2; for example, a log2 fold change of 1.5 means that the gene's expression is increased by a multiplicative factor of 2(1.5) = 2.82.
+
 Q. Take a moment to look at the results table. What information has DESeq2 reported? What additional information would we like to have alongside our results? 
 
 ## Part 5 : Reporting and Data Visualisation
