@@ -7,7 +7,7 @@ output: html_document
 ## PART 1 : Configuring the Rstudio session for our workshop
 
 
-###STEP X
+###STEP 1
 
 Execute the following block of code to configure the loaction of the R packages required for this workshop:
 
@@ -23,7 +23,7 @@ stopifnot(file.exists(lib.loc))
 .libPaths()
 ```
 
-### STEP X: Load the following R packages into R by copying and pasting all the following at the terminal
+### STEP 2: Load the following R packages into R by copying and pasting all the following at the terminal
 
 These packages are required for us to perform our analysis steps in DESeq2, and some additional packages to manipulate our data and draw graphs. Execute the following block of code to load in the following packages:
 
@@ -42,7 +42,7 @@ library("RColorBrewer")
 
 
 
-### STEP X: Type the following into the console to identify the working current R working directory:
+### STEP 3: Type the following into the console to identify the working current R working directory:
 
 ```{r}
 getwd()
@@ -61,7 +61,7 @@ Q. Can you see that the counts table is one of the listed files?
 
 ## PART 2 : Importing The Count Data For DESeq2 analysis
 
-### STEP X: Loading the count data into R 
+### STEP 5: Loading the count data into R 
 
 Here we are using 2 built in R functions read.table() and as.matrix() to import a text file into R that countins the RNAseq count data we will analyse. The as.matrix function converts our imported text file into an R matrix object called "CountsTable_PPP2R3B"    
 
@@ -73,7 +73,7 @@ CountsTable_PPP2R3B <- as.matrix(read.table("CountsTable_PPP2R3B.txt", header = 
 
 By modifying the read.table() function with "header = TRUE" our R matrix object will have defined column headers as the the first line of our file.
 
-### STEP X: View the top of the "CountsTable_PPP2R3B" matrix object using the head command in R:
+### STEP 6: View the top of the "CountsTable_PPP2R3B" matrix object using the head command in R:
 
 Here we are using the built in R function head() to view the top of the CountsTable_PPP2R3B matrix object:
 
@@ -97,7 +97,7 @@ Thus we have three replicates of untreated cells and three replicates of treated
 
 ## PART 3 : Creating our DESeq experiment
 
-### STEP 10: Creating our DESeq experiment
+### STEP 7: Creating our DESeq experiment
 
 This is probably the most tricky part when using DESeq2
 
@@ -155,7 +155,7 @@ Before we conduct our differential gene expression analysis, we will perform som
 
 ## Part 4 : Quality Control
 
-### STEP X: rlog trandformation and Scatter plots
+### STEP 8: rlog trandformation and Scatter plots
 
 Many common statistical methods for exploratory analysis of multidimensional data, for example clustering and principal components analysis (PCA), work best for data that generally has the same range of variance at different ranges of the mean values. When the expected amount of variance is approximately the same across different mean values, the data is said to be homoskedastic. 
 
@@ -200,7 +200,7 @@ We can see that genes with low counts (bottom left hand corner) seem to be exces
 
 Q. Why are we interested in comparing our experimental samples?
 
-### STEP 12: Principle Component Analysis (PCA)
+### STEP 9: Principle Component Analysis (PCA)
 
 With a PCA analysis we can visualise how close (or far) our experimental samples cluster from one another. In normal experimental conditions we would like our sample replicates to not be too dissimilar from each other.
 
@@ -213,7 +213,7 @@ plotPCA(rld, intgroup="condition")
 ```
 Q. Take a moment to look at the PCA plot. What is this analysis showing us?
 
-### STEP X: Heatmap of sample-to-sample distances
+### STEP 10: Heatmap of sample-to-sample distances
 
 A useful first step in an RNA-seq analysis is often to assess overall similarity between samples: Which samples are similar to each other, which are different? Does this fit to the expectation from the experiment's design?
 
@@ -244,7 +244,7 @@ pheatmap(sampleDistMatrix,
 
 ## Part 5 : Differential Gene Expression Analysis in DESeq2
 
-### STEP X: Run the differential gene expression analysis in DESeq2:
+### STEP 11: Run the differential gene expression analysis in DESeq2:
 
 As we have already specified an experimental design when we created the DESeq2Experiment, we can run the differential expression pipeline on the raw counts with a single call to the function DESeq():
 
@@ -275,7 +275,7 @@ We can also summarize the results with the following line of code, which reports
 summary(results)
 ```
 
-### STEP X: plot dispersion estimates
+### STEP 12: plot dispersion estimates
 
 The strategy taken by DESeq2 for dispersion estimation is summarized by the plotDispEsts() function. It shows (a) black per-gene dispersion estimates, (b) a red trend line representing the global relationship between dispersion and normalized count, ? blue 'shrunken' values moderating individual dispersion estimates by the global relationship, and (d) blue-circled dispersion outliers with high gene-wise dispersion that were not adjusted.
 
@@ -286,7 +286,7 @@ plotDispEsts(DESeq2Experiment, CV = FALSE,
              legend = TRUE, log = "xy", cex = 0.45)
 ```
 
-### STEP X: Reporting the differential gene expression results
+### STEP 13: Reporting the differential gene expression results
 
 Annotate with gene IDs (gene symbol and EntrezID) using the database package #org.Hs.eg.db. We want to know what gene is which ! So we can populate our results table with gene level information.
 
@@ -324,7 +324,7 @@ Check that the entrez ID has been added to the results table with the head funct
 head(results)
 ```
 
-### STEP X: Writing the results to an excel file
+### STEP14X: Writing the results to an excel file
 
 We can order our results by the adjusted pvalues so that the most significant results are at the top:
 
@@ -360,7 +360,7 @@ write.csv(resOrderedDF, file = outputCSV)
 
 Q. Did it create the excel file? Go to the folder and open the excel file. What are the top 2 significant results? 
 
-### STEP 16: MA - Plot
+### STEP 15: MA - Plot
 
 An MA-plot provides a useful overview for an experiment with a two-group comparison. 
 
@@ -375,7 +375,7 @@ plotMA(results,
 	
 Q. Why is there a large spread of non-significant results on the left hand side of the MA-plot?	
 
-### STEP 17: Volcano - Plot
+### STEP 16: Volcano - Plot
 
 A Volcano plot is a nice way of presenting differential gene expression analysis from RNAseq data.
 
@@ -529,14 +529,18 @@ par(mar=c(1,1,1,1))
 heatmap.2( log2(counts(DESeq2Experiment,normalized=TRUE) [rownames(DESeq2Experiment) %in% selected,]), col = hmcol, scale = "row", Rowv = TRUE, Colv = FALSE, dendrogram = "row", trace = "none", margin=c(4,6), cexRow = 0.4, cexCol = 1, keysize = 0.8)
 ```
  
-### step X: Plot normalised counts for a single gene 
+### step 18: Plot normalised counts for a single gene 
 
 A quick way to visualize the counts for a particular gene is to use the plotCounts function that takes as arguments the DESeqDataSet, a gene name, and the group over which to plot the counts
 
+
+
 ```{r}
-plotCounts(DESeq2Experiment, intgroup = "condition", normalized = TRUE,
-           transform = TRUE, main, xlab = "group", returnData = FALSE,
-           replaced = FALSE, pc)
+topGene <- rownames(results) [which.min(results$padj)]
+```
+
+```{r}
+plotCounts(DESeq2Experiment, gene=topGene, intgroup=c("condition")) 
 ```
 
 
