@@ -26,6 +26,7 @@ Here will analyse a slightly different and more complex set of data in DESeq2. T
 1. Open the file ("Experiment2.R") by clicking on it in the bottom right hand pane.
 2. Begin to follow the instructions therein on this second dataset.
 3. In this instance we are using an Rscript file, rather than and Rmarkdown file. Blocks of code can either be executed with the "run" button or pasted into the console below.
+4. Take the time to sytematically go through the commands.
 
 
 Enjoy !
