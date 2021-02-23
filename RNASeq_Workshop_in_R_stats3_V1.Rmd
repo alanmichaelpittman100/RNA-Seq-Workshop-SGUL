@@ -63,7 +63,7 @@ Q. Can you see that the counts table is one of the listed files?
 
 ### STEP 5: Loading the count data into R 
 
-Here we are using 2 built in R functions read.table() and as.matrix() to import a text file into R that countins the RNAseq count data we will analyse. The as.matrix function converts our imported text file into an R matrix object called "CountsTable_PPP2R3B"    
+Here we are using 2 built in R functions read.table() and as.matrix() to import a text file into R that contains the RNAseq count data we will analyse. The as.matrix function converts our imported text file into an R matrix object called "CountsTable_PPP2R3B"    
 
 Execute the following block of R code:
 
@@ -164,7 +164,7 @@ For RNA-seq raw counts, however, the variance grows with the mean. For example, 
 As a solution, DESeq2 offers transformations for count data that stabilize the variance across the mean. One such transformation is the regularized-logarithm transformation or rlog2. For genes with high counts, the rlog transformation will give similar result to the ordinary log2 transformation of normalized counts. For genes with lower counts, however, the values are shrunken towards the genes' averages across all samples. Using an empirical Bayesian prior on inter-sample differences in the form of a ridge penalty, the rlog-transformed data then becomes approximately homoskedastic, and can be used directly for computing distances between samples and making PCA plots.
 
 
-The function rlog() returns an object containg the rlog-transformed values in its assay slot:
+The function rlog() returns an object containing the rlog-transformed values in its assay slot:
 
 ```{r}
 rld <- rlog(DESeq2Experiment, blind = FALSE)
@@ -174,7 +174,7 @@ To compare the rlog transformed values of sample 1 (SKMEL2_Untreated_1) to sampl
 
 The plot() function is generating a scatter plot comparing sample 1 and sample 2
 
-Scatterplot of rlog tranformed counts from two samples:
+Scatterplot of rlog transformed counts from two samples:
 
 ```{r}
 plot(assay(rld) [,1:2], pch=16, cex=0.3)
@@ -196,7 +196,7 @@ Now let's generate a scatterplot of log2 tranformed counts from two samples:
 plot(log2(counts(DESeq2Experiment, normalized=TRUE) [,1:2] + 1), pch=16, cex=0.3)
 ```
 
-We can see that genes with low counts (bottom left hand corner) seem to be excessivley variable on the ordinarly logarithmic scale, while the rlog transformation compresses differences for the low count genes for which the data provide little information about differential expression.
+We can see that genes with low counts (bottom left hand corner) seem to be excessively variable on the ordinary logarithmic scale, while the rlog transformation compresses differences for the low count genes for which the data provide little information about differential expression.
 
 Q. Why are we interested in comparing our experimental samples?
 
