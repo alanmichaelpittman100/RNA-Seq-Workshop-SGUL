@@ -30,3 +30,13 @@ Here will analyse a slightly different and more complex set of data in DESeq2. T
 
 
 Enjoy !
+
+
+Experiment 3 - contingency plan in case there are any problems with R packages!
+
+1. Open the file ("Experiment3.R") by clicking on it in the bottom right hand pane.
+2. Begin to follow the instructions therein on this second dataset.
+3. In this instance we are using an Rscript file, rather than and Rmarkdown file. Blocks of code can either be executed with the "run" button or pasted into the console below.
+4. Take the time to sytematically go through the commands.
+
+
