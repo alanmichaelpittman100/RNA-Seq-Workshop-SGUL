@@ -222,7 +222,7 @@ sampleDists
 In order to plot the sample distance matrix with the rows/columns arranged by the distances in our distance matrix, we manually provide sampleDists to the clustering_distance argument of the pheatmap() function.
 
 
-```{r}
+```{r, error=TRUE}
 sampleDistMatrix <- as.matrix(sampleDists)
 rownames(sampleDistMatrix) <- condition
 colnames(sampleDistMatrix) <- NULL
@@ -404,7 +404,7 @@ Volcano plot of adjusted p-values
 alpha <- 0.05
 ```
 
-```{r}
+```{r, error=TRUE}
 cols <- densCols(results$log2FoldChange, results$sig)
 cols[results$pvalue ==0] <- "purple"
 results$pch <- 19
@@ -461,7 +461,7 @@ Volcano plot of adjusted p-values
 alpha <- 0.05
 ```
 
-```{r}
+```{r, error=TRUE}
 cols <- densCols(resOrderedDF_mod$log2FoldChange, resOrderedDF_mod$sig)
 cols[resOrderedDF_mod$pvalue ==0] <- "purple"
 resOrderedDF_mod$pch <- 19
