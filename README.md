@@ -3,11 +3,10 @@
 
 Alan Pittman | apittman@sgul.ac.uk | St. George's University of London 
 
-First run : 29-March-2019 | 1.30pm. H5.2 | SGUL Bioinformatics workshop
+First run : 29-March-2019 | 1.30pm. H5.2 | SGUL Bioinformatics Unit RNAseq workshop
 
+# SGUL BDiB Students:
 To create a copy of this repository in RStudio follow these steps:
-
-SGUL BDiB Students:
 
 1. On a web browser open RStudio Server at https://stats3.sgul.ac.uk/rstudio and login. Close down any old RSession and start a new one
 2. File menu > New project...
@@ -43,7 +42,8 @@ Experiment 3 - contingency plan in case there are any problems with R packages!
 
 ----------------------------------------------------------------------------------
 
-SGUL Bioinformatics Unit Workshop:
+# SGUL Bioinformatics Unit Workshop:
+To create a copy of this repository in RStudio follow these steps:
 
 1. On a web browser open RStudio Server at https://stats3.sgul.ac.uk/rstudio and login. Close down any old RSession and start a new one
 2. File menu > New project...
