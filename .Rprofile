@@ -1,5 +1,5 @@
 if (grepl("Linux stats3", system("uname -a", intern=T))) {
-  if (R.version$version.string != ""R version 3.4.3 (2017-11-30)""){
+  if (R.version$version.string != "R version 3.4.3 (2017-11-30)"){
     stop("Please choose R version 3.4.3 using the dropdown menu in the top right corner of RStudio Server.")
   } else {
     message("R version correct: ", R.version$version.string, "\n")
