@@ -1,0 +1,541 @@
+---
+title: "RNA-Seq Workshop in R"
+output: html_document
+---
+
+
+## PART 1 : Configuring the Rstudio session for our workshop
+
+
+###STEP 1
+
+Execute the following block of code to configure the loaction of the R packages required for this workshop:
+
+```{r}
+stopifnot(R.version$version.string == "R version 3.4.3 (2017-11-30)")
+```
+
+### STEP 2: Load the following R packages into R by copying and pasting all the following at the terminal
+
+These packages are required for us to perform our analysis steps in DESeq2, and some additional packages to manipulate our data and draw graphs. Execute the following block of code to load in the following packages:
+
+
+```{r}
+library("magrittr")
+library("Rsamtools")
+library("GenomicAlignments")
+library("DESeq2")
+library("ggplot2")
+library("org.Hs.eg.db")
+library("gplots")
+library("pheatmap")
+library("RColorBrewer")
+```
+
+
+
+### STEP 3: Type the following into the console to identify the working current R working directory:
+
+```{r}
+getwd()
+```
+
+
+### STEP X: Check the downloaded and unpacked file "CountsTable_PPP2R3B.txt" is present in the working directory 
+
+With the list.files() finction we view the files in our current working directory:
+
+```{r}
+list.files()
+```
+
+Q. Can you see that the counts table is one of the listed files?
+
+## PART 2 : Importing The Count Data For DESeq2 analysis
+
+### STEP 5: Loading the count data into R 
+
+Here we are using 2 built in R functions read.table() and as.matrix() to import a text file into R that countins the RNAseq count data we will analyse. The as.matrix function converts our imported text file into an R matrix object called "CountsTable_PPP2R3B"    
+
+Execute the following block of R code:
+
+```{r}
+CountsTable_PPP2R3B <- as.matrix(read.table("CountsTable_PPP2R3B.txt", header = TRUE))
+```
+
+By modifying the read.table() function with "header = TRUE" our R matrix object will have defined column headers as the the first line of our file.
+
+### STEP 6: View the top of the "CountsTable_PPP2R3B" matrix object using the head command in R:
+
+Here we are using the built in R function head() to view the top of the CountsTable_PPP2R3B matrix object:
+
+```{r}
+head(CountsTable_PPP2R3B)
+```
+
+By default, the head() function is showing us the first 6 lines, we can modify the head command to show us a different number of lines if required. In the modified code below we can view the first 12 lines:
+
+```{r}
+head(CountsTable_PPP2R3B, n = 12)
+```
+
+Modify the head function in the console below to view different numbers of lines of the CountsTable_PPP2R3B object.
+
+Q. Take a moment and look at how the count data is arranged; the first column is the genomic feature (in our case a gene exon number) and the subsequent columns are count data of each of our samples.
+
+The first three count data columns are the RNA read counts of each of our untreated cell line samples. The next three columns are the RNA read counts of each of our treated cell lines.
+
+Thus we have three replicates of untreated cells and three replicates of treated cells
+
+## PART 3 : Creating our DESeq experiment
+
+### STEP 7: Creating our DESeq experiment
+
+This is probably the most tricky part when using DESeq2
+
+Here we are creating a new R matrix object called DESeq2Experiment using the as.matrix() function on our CountsTable_PPP2R3B object:
+
+```{r}
+DESeq2Experiment <- as.matrix(CountsTable_PPP2R3B)
+```
+
+We will perform our analysis using the common R package "DESeq2" on our DESeq2Experiemnt matrix. The simplest design formula for differential expression would be ~ condition, where condition is a column in coldata(DESeq2Experiment) that specifies which of two (or more groups) the samples belong to.
+
+To build our experiemnt in DESeq2, we need to assign "untreated" or "treated" status to each of the cell line replicate columns of count data 
+
+The following blocks of R code will define our cell line conditions as being either treated or untreated:
+
+```{r}
+condition <- factor(c(rep("untreated", 3), rep("treated", 3)))
+```
+
+Here we create a data frame of our cell lines and experimental conditions:
+
+```{r}
+coldata <- data.frame(row.names=colnames(DESeq2Experiment), condition)
+```
+
+Next we will define our DESeq2 experiment design to the "condition" of the count data of the cell lines as defined above. This is acheived with the DESeq2 function DESeqDataSetFromMatrix()
+
+```{r}
+DESeq2Experiment <- DESeqDataSetFromMatrix(countData=DESeq2Experiment, colData=coldata, design=~condition)
+```
+This means that in our DESeq2 analysis we will be comparing the untreated condition of our cells to the treated condition of our cells.
+
+We just need to check that our base reference is the "untreated" sample:
+
+```{r}
+DESeq2Experiment$condition
+```
+Our base level is "treated" and we need to change our base level to "untreated". It is prefered in R that the first level of a factor be the reference level (e.g. control, or untreated samples)
+
+We can re-level the order with the following relevel() function- this is because we want out untreated cells to be at the base level when we perform the differential gene expression analysis:
+
+```{r}
+DESeq2Experiment$condition <- relevel(DESeq2Experiment$condition, "untreated")
+```
+
+Now just checking again that the level ordering has been changed:
+
+```{r}
+DESeq2Experiment$condition
+```
+
+Now our base level is "untreated" ; thus we have sucessfully contructed our DESeq2 experiment
+
+Before we conduct our differential gene expression analysis, we will perform some quality control procedures to assess the quality of our data. 
+
+## Part 4 : Quality Control
+
+### STEP 8: rlog trandformation and Scatter plots
+
+Many common statistical methods for exploratory analysis of multidimensional data, for example clustering and principal components analysis (PCA), work best for data that generally has the same range of variance at different ranges of the mean values. When the expected amount of variance is approximately the same across different mean values, the data is said to be homoskedastic. 
+
+For RNA-seq raw counts, however, the variance grows with the mean. For example, if one performs PCA directly on a matrix of size-factor-normalized read counts, the result typically depends only on the few most strongly expressed genes because they show the largest absolute differences between samples. A simple and often used strategy to avoid this is to take the logarithm of the normalized count values plus a small pseudocount; however, now the genes with the very lowest counts will tend to dominate the results because, due to the strong Poisson noise inherent to small count values, and the fact that the logarithm amplifies differences for the smallest values, these low count genes will show the strongest relative differences between samples.
+
+As a solution, DESeq2 offers transformations for count data that stabilize the variance across the mean. One such transformation is the regularized-logarithm transformation or rlog2. For genes with high counts, the rlog transformation will give similar result to the ordinary log2 transformation of normalized counts. For genes with lower counts, however, the values are shrunken towards the genes' averages across all samples. Using an empirical Bayesian prior on inter-sample differences in the form of a ridge penalty, the rlog-transformed data then becomes approximately homoskedastic, and can be used directly for computing distances between samples and making PCA plots.
+
+
+The function rlog() returns an object containg the rlog-transformed values in its assay slot:
+
+```{r}
+rld <- rlog(DESeq2Experiment, blind = FALSE)
+```
+
+To compare the rlog transformed values of sample 1 (SKMEL2_Untreated_1) to sample 2 (SKMEL2_Untreated_1) use the following R code
+
+The plot() function is generating a scatter plot comparing sample 1 and sample 2
+
+Scatterplot of rlog tranformed counts from two samples:
+
+```{r}
+plot(assay(rld) [,1:2], pch=16, cex=0.3)
+```
+
+Q. Modify the R code above and run in the console below to produce another graph comparing sample 4 to sample 6
+
+Now lets examine the effect of log2 transformation on our data. For the log2 approach, we need to first estimate size factors to account for sequencing depth
+
+Use the estimateSizeFactors() function
+
+```{r}
+DESeq2Experiment <- estimateSizeFactors(DESeq2Experiment)
+```
+
+Now let's generate a scatterplot of log2 tranformed counts from two samples:
+
+```{r}
+plot(log2(counts(DESeq2Experiment, normalized=TRUE) [,1:2] + 1), pch=16, cex=0.3)
+```
+
+We can see that genes with low counts (bottom left hand corner) seem to be excessivley variable on the ordinarly logarithmic scale, while the rlog transformation compresses differences for the low count genes for which the data provide little information about differential expression.
+
+Q. Why are we interested in comparing our experimental samples?
+
+### STEP 9: Principle Component Analysis (PCA)
+
+With a PCA analysis we can visualise how close (or far) our experimental samples cluster from one another. In normal experimental conditions we would like our sample replicates to not be too dissimilar from each other.
+
+In this ordination method, the data points (here, the samples) are projected onto the 2D plane such that they spread out in the two directions that explain most of the differences. The x-axis is the direction that separates the data points the most. The values of the samples in this direction are written PC1. The y-axis is a direction (it must be orthogonal to the first direction) that separates the data the second most. The values of the samples in this direction are written PC2. The percent of the total variance that is contained in the direction is printed in the axis label. Note that these percentages do not add to 100%, because there are more dimensions that contain the remaining variance (although each of these remaining dimensions will explain less than the two that we see).
+
+The following function plotPCA() in the DESeq2 package will generate a PCA plot of our rlog transformed count data.
+
+```{r}
+plotPCA(rld, intgroup="condition")
+```
+Q. Take a moment to look at the PCA plot. What is this analysis showing us?
+
+### STEP 10: Heatmap of sample-to-sample distances
+
+A useful first step in an RNA-seq analysis is often to assess overall similarity between samples: Which samples are similar to each other, which are different? Does this fit to the expectation from the experiment's design?
+
+We use the R function dist to calculate the Euclidean distance between samples. To ensure we have a roughly equal contribution from all genes, we use it on the rlog-transformed data. We need to transpose the matrix of values using t, because the dist function expects the different samples to be rows of its argument, and different dimensions (here, genes) to be columns.
+
+```{r}
+sampleDists <- dist( t( assay(rld) ) )
+```
+
+```{r}
+sampleDists
+```
+
+In order to plot the sample distance matrix with the rows/columns arranged by the distances in our distance matrix, we manually provide sampleDists to the clustering_distance argument of the pheatmap() function.
+
+
+```{r}
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- condition
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+	  clustering_distance_rows=sampleDists,
+	  clustering_distance_cols=sampleDists,
+	  col=colors)
+```
+
+
+## Part 5 : Differential Gene Expression Analysis in DESeq2
+
+### STEP 11: Run the differential gene expression analysis in DESeq2:
+
+As we have already specified an experimental design when we created the DESeq2Experiment, we can run the differential expression pipeline on the raw counts with a single call to the function DESeq():
+
+
+```{r}
+DESeq2Experiment <- DESeq(DESeq2Experiment)
+```
+
+Now with the results() function we will build a table of the differential gene expression analysis results. Calling results without any arguments will extract the estimated log2 fold changes and p values for the last variable in the design formula. If there are more than 2 levels for this variable, results will extract the results table for a comparison of the last level over the first level. The comparison is printed at the top of the output: condition treated vs untreated. 
+
+```{r}
+results <- results(DESeq2Experiment)
+```
+
+View the results table with the head() function in R:
+
+```{r}
+head(results)
+```
+
+The column log2FoldChange is the effect size estimate. It tells us how much the gene's expression has changed due to the treatment in comparison to the untreated samples. This value is reported on a logarithmic scale to base 2; for example, a log2 fold change of 1.5 means that the gene's expression is increased by a multiplicative factor of 2(1.5) = 2.82.
+
+Q. Take a moment to look at the results table. What information has DESeq2 reported? What additional information would we like to have alongside our results? 
+
+## Part 5 : Reporting and Data Visualisation
+
+We can also summarize the results with the following line of code, which reports some additional information:
+
+```{r}
+summary(results)
+```
+
+### STEP 12: plot dispersion estimates
+
+The strategy taken by DESeq2 for dispersion estimation is summarized by the plotDispEsts() function. It shows (a) black per-gene dispersion estimates, (b) a red trend line representing the global relationship between dispersion and normalized count, ? blue 'shrunken' values moderating individual dispersion estimates by the global relationship, and (d) blue-circled dispersion outliers with high gene-wise dispersion that were not adjusted.
+
+
+```{r}
+plotDispEsts(DESeq2Experiment, CV = FALSE,
+             genecol = "black", fitcol = "red", finalcol = "dodgerblue",
+             legend = TRUE, log = "xy", cex = 0.45)
+```
+
+### STEP 13: Reporting the differential gene expression results
+
+Annotate with gene IDs (gene symbol and EntrezID) using the database package #org.Hs.eg.db. We want to know what gene is which ! So we can populate our results table with gene level information.
+
+We can use the mapIds() function to add individual columns to our results table. We provide the row names of our results table as a key, and specify that keytype=ENSEMBL. The column argument tells the mapIds function which information we want, and the multiVals argument tells the function what to do if there are multiple possible values for a single input value. Here we ask to just give us back the first one that occurs in the database. 
+
+First annotate the results with the gene symbol:
+
+```{r}
+results$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(results),
+                     column="SYMBOL",
+                     keytype="ENSEMBL",
+                     multiVals="first")
+```
+
+Check that the gene symbol has been added to the results table with the head function:
+
+```{r}
+head(results)
+```
+
+Now annotate the results with the entrez ID number:
+
+```{r}
+results$entrez <- mapIds(org.Hs.eg.db,
+                   keys=row.names(results),
+                   column="ENTREZID",
+                   keytype="ENSEMBL",
+                   multiVals="first")
+```
+
+Check that the entrez ID has been added to the results table with the head function:
+
+```{r}
+head(results)
+```
+
+### STEP14X: Writing the results to an excel file
+
+We can order our results by the adjusted pvalues so that the most significant results are at the top:
+
+```{r}
+resOrdered <- results[order(results$padj), ]
+```
+
+We can then view this new ordering with the head() function:
+
+```{r}
+head(resOrdered)
+```
+
+It's useful to be able to export our results to an excel file for ease of viewing the data.
+
+First we will convert our results to a data frame:
+
+```{R}
+resOrderedDF <- as.data.frame(resOrdered)
+```
+
+Here we name our excel file (name the file anything that you would like!):
+
+```{r}
+outputCSV <- ('Differential_expression_results.csv')
+```
+
+Here we call the R function write.csv() to convert our results data frame into an excel file: 
+
+```{r}
+write.csv(resOrderedDF, file = outputCSV)
+```
+
+Q. Did it create the excel file? Go to the folder and open the excel file. What are the top 2 significant results? 
+
+### STEP 15: MA - Plot
+
+An MA-plot provides a useful overview for an experiment with a two-group comparison. 
+
+Significant results below our threshold (padj<0.05) are denoted in red, non-significant results are in black.
+
+An MA-plot can be generated with the plotMA() function in R:
+
+```{r}
+plotMA(results, 
+	ylim=c(-5,5))
+```
+	
+Q. Why is there a large spread of non-significant results on the left hand side of the MA-plot?	
+
+### STEP 16: Volcano - Plot
+
+A Volcano plot is a nice way of presenting differential gene expression analysis from RNAseq data.
+
+In statistics, a volcano plot is a type of scatter-plot that is used to quickly identify changes in large data sets composed of replicate data. It plots significance versus fold-change on the y and x axes, respectively. 
+
+```{r}
+results$sig <- -log10(results$padj)
+```
+
+```{r}
+sum(is.infinite(results$sig))
+```
+
+```{r}
+results[is.infinite(results$sig),"sig"] <- 350
+```
+
+Select genes with a defined p-value (DESeq2 assigns NA to some genes and we want to exclude any of these)
+
+```{r}
+genes.to.plot <- !is.na(results$pvalue)
+```
+
+```{r}
+range(results[genes.to.plot,
+		"log2FoldChange"])
+```
+
+Volcano plot of adjusted p-values
+
+```{r}
+alpha <- 0.05
+```
+
+```{r}
+cols <- densCols(results$log2FoldChange, results$sig)
+cols[results$pvalue ==0] <- "purple"
+results$pch <- 19
+results$pch[results$pvalue ==0] <- 6
+plot(results$log2FoldChange, 
+     results$sig, 
+     col=cols, panel.first=grid(),
+     main="Volcano plot", 
+     xlab="Effect size: log2(fold-change)",
+     ylab="-log10(adjusted p-value)",
+     pch=results$pch, cex=0.4)
+abline(v=0)
+abline(v=c(-1,1), col="brown")
+abline(h=-log10(alpha), col="brown")
+```
+
+Q. What is the volcano plot showing us with respect to the differential gene expression results?
+
+#################################
+
+### STEP 17: Volcano - Plot 2
+
+Lets remove our two most significant genes (which are massively upregulated) to scale our graph better, here we remove the top 4 most significant SNPs
+```{r}
+resOrderedDF_mod <- resOrderedDF[-1:-4,]
+```
+
+```{r}
+resOrderedDF_mod$sig <- -log10(resOrderedDF_mod$padj)
+```
+
+```{r}
+sum(is.infinite(resOrderedDF_mod$sig))
+```
+
+```{r}
+resOrderedDF_mod[is.infinite(resOrderedDF_mod$sig),"sig"] <- 350
+```
+
+Select genes with a defined p-value (DESeq2 assigns NA to some genes and we want to exclude any of these)
+
+```{r}
+genes.to.plot <- !is.na(resOrderedDF_mod$pvalue)
+```
+
+```{r}
+range(resOrderedDF_mod[genes.to.plot,
+		"log2FoldChange"])
+```
+
+Volcano plot of adjusted p-values
+
+```{r}
+alpha <- 0.05
+```
+
+```{r}
+cols <- densCols(resOrderedDF_mod$log2FoldChange, resOrderedDF_mod$sig)
+cols[resOrderedDF_mod$pvalue ==0] <- "purple"
+resOrderedDF_mod$pch <- 19
+resOrderedDF_mod$pch[resOrderedDF_mod$pvalue ==0] <- 6
+plot(resOrderedDF_mod$log2FoldChange, 
+     resOrderedDF_mod$sig, 
+     col=cols, panel.first=grid(),
+     main="Volcano plot", 
+     xlab="Effect size: log2(fold-change)",
+     ylab="-log10(adjusted p-value)",
+     pch=results$pch, cex=0.4)
+abline(v=0)
+abline(v=c(-1,1), col="brown")
+abline(h=-log10(alpha), col="brown")
+```
+
+### How many differentially expressed genes ?
+
+```{r}
+sig <- resOrdered[!is.na(resOrdered$padj) & resOrdered$padj<0.1 & abs(resOrdered$log2FoldChange)>=0.5,]
+```
+
+```{r}
+head(sig)
+```
+
+
+Another diagnostic is a plot of the histogram of p values, which should be uniform under the null hypothesis; skew to the right may indicate batch or other effects not accommodated in the model
+
+```{r}
+hist(results$pvalue, breaks=40, col="pink")
+```
+
+### Heat Map
+
+```{r}
+selected <- rownames(sig);selected
+```
+
+colours of heatmap
+
+```{r}
+hmcol <- heat.colors(5, alpha = 1)
+```
+
+```{r}
+graphics.off()
+```
+
+```{r}
+par("mar")
+```
+
+```{r}
+par(mar=c(1,1,1,1))
+```
+
+```{r}
+heatmap.2( log2(counts(DESeq2Experiment,normalized=TRUE) [rownames(DESeq2Experiment) %in% selected,]), col = hmcol, scale = "row", Rowv = TRUE, Colv = FALSE, dendrogram = "row", trace = "none", margin=c(4,6), cexRow = 0.4, cexCol = 1, keysize = 0.8)
+```
+ 
+### step 18: Plot normalised counts for a single gene 
+
+A quick way to visualize the counts for a particular gene is to use the plotCounts function that takes as arguments the DESeqDataSet, a gene name, and the group over which to plot the counts
+
+
+
+```{r}
+topGene <- rownames(results) [which.min(results$padj)]
+```
+
+```{r}
+plotCounts(DESeq2Experiment, gene=topGene, intgroup=c("condition")) 
+```
+
+
+#Workshop complete !
